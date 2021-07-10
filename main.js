@@ -16,13 +16,9 @@ var app = http.createServer(function (request, response) {
     return;
   }
   response.writeHead(200);
-  // console.log(__dirname + _url);
-  //출력 : C:\Users\82107\Documents\GitHub\CRUD/index.html
-  //__dirname(폴더경로) ; C:\Users\82107\Documents\GitHub\CRUD 
-  // _url : index.html  
+
   response.end(queryData.id);
-  // 사용자에게 전송하는 데이터 ; fs.readFileSync(__dirname + url)
-  // response.end('YJ' + url);
+
 
 });
 app.listen(3000);
