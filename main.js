@@ -7,6 +7,7 @@ var app = http.createServer(function (request, response) {
   var _url = request.url; // url 에 언더바를 붙인 이유 ; 위의 url 모듈의 변수명이 url이어서 걍 바꿈.
   var queryData = url.parse(_url, true).query; //url 의 query부분 추출.
   var title = queryData.id;
+
   if (_url == '/') {
     title = 'Welcome'; // 최상위 루트에서는 Welcome이 나옴!
   }
