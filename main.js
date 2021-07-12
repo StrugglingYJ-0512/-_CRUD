@@ -11,32 +11,59 @@ var app = http.createServer(function (request, response) {
   // 찍어보면, 그 안에 pathname 이 존재한다. 의미하는 바는 path는 queryString까지 모두 포함이고,
   // pathname은 queryString을 제외한 값만 있음을 확인할 수 있다!!
 
-  var title = queryData.id;
 
-  if (pathname === '/') {
-    fs.readFile(`data/${queryData.id}`, 'utf8', function (err, description) {
+  if (pathname === '/') { // 이렇게만 홑if문이라면, 최상위 루트인 홈페이지는 undefined상태이다.
+    if (queryData.id === undefined) {
+      var title = 'Welcome';
+      var description = 'Hello, Node.js';
       var template = `
-        <!doctype html>
-        <html>
-        <head>
-          <title>WEB1 - ${title}</title>                                     
-          <meta charset="utf-8">
-        </head>
-        <body>
-          <h1><a href="/">WEB</a></h1>
-          <ul>
-            <li><a href="/?id=HTML">HTML</a></li>
-            <li><a href="/?id=CSS">CSS</a></li>
-            <li><a href="/?id=JavaScript">JavaScript</a></li>
-          </ul>
-          <h2>${title}</h2>
-          <p>${description}</p>
-        </body>
-        </html>
-        `;
+      <!doctype html>
+      <html>
+      <head>
+        <title>WEB1 - ${title}</title>                                     
+        <meta charset="utf-8">
+      </head>
+      <body>
+        <h1><a href="/">WEB</a></h1>
+        <ul>
+          <li><a href="/?id=HTML">HTML</a></li>
+          <li><a href="/?id=CSS">CSS</a></li>
+          <li><a href="/?id=JavaScript">JavaScript</a></li>
+        </ul>
+        <h2>${title}</h2>
+        <p>${description}</p>
+      </body>
+      </html>
+      `;
       response.writeHead(200);
       response.end(template);
-    })
+    } else {
+      fs.readFile(`data/${queryData.id}`, 'utf8', function (err, description) {
+        var title = queryData.id;
+        var template = `
+          <!doctype html>
+          <html>
+          <head>
+            <title>WEB1 - ${title}</title>                                     
+            <meta charset="utf-8">
+          </head>
+          <body>
+            <h1><a href="/">WEB</a></h1>
+            <ul>
+              <li><a href="/?id=HTML">HTML</a></li>
+              <li><a href="/?id=CSS">CSS</a></li>
+              <li><a href="/?id=JavaScript">JavaScript</a></li>
+            </ul>
+            <h2>${title}</h2>
+            <p>${description}</p>
+          </body>
+          </html>
+          `;
+        response.writeHead(200);
+        response.end(template);
+      })
+    }
+
   } else {
     response.writeHead(404);
     response.end('Not Found');
