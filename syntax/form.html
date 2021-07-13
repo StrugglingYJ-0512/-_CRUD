@@ -1,0 +1,32 @@
+<form action="http://localhost:3000/prcess_create" method="post">
+  <!-- 전송하고자 하는 데이터를 form태그로 감싼다.  -->
+  <!-- action = "전송 받을 서버 주소" -->
+  <p><input type="text" name="title"></p>
+  <!-- name : 입력한 각각의 값들의 이름이 있어야 서버에서 받았을 때 의미가 있다. -->
+  <p>
+    <textarea name="description"></textarea>
+    <!-- 여러 줄을 input  -->
+  </p>
+  <p>
+    <input type="submit" />
+    <!-- 전송 버튼 -->
+  </p>
+</form>
+<!-- 전송하면, http://localhost:3000/prcess_create?title=hi&description=dfdf 로
+queryString이 title=hi&description=dfdf 로 생긴다.
+==> form의 기능 : form 안의 각각의 control안에 사용자가 입력한 정보를
+      submit버튼을 눌렀을 때, 
+      action 속성이 가리키는 서버로 queryString의 형태로 데이터를 전송하는 HTML 의 기능 
+    단, 이는 좋은 방법이 아니다.-->
+
+<!-- id = html 은 좋은방법이다.
+    wyh??
+     주소 상에 우리가 필요한 데이터가 포함이 있어야만, 
+    이 주소를 누군가에게 전송해도 받는이가 클릭하면
+  바로 그 목적지로 올 수 있다.  -->
+<!-- 서버에 데이터를 CRUD를 할 떄는 주소에 데이터를 실어서 보내면 안 된다.
+    눈에 보이지 않는 방법으로 해야 한다.  -->
+<!-- method="post" 로 하면, http://localhost:3000/prcess_create 로 url 이 생성된다.
+      데이터를 사람 눈에 보이지 않도록 숨겼다. 
+      또한, 이렇게 하면 많은 정보를 url 로 데이터를 보낼 수 있는데,
+          url 은 limit가 있기 때문에 많은 데이터를 담을 수가 없다. -->
