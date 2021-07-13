@@ -13,18 +13,22 @@ var app = http.createServer(function (request, response) {
 
 
   if (pathname === '/') { // 이렇게만 홑if문이라면, 최상위 루트인 홈페이지는 undefined상태이다.
-    if (queryData.id === undefined) {
+    if (queryData.id === undefined) {// /만 존재하는 최상위루트 홈페이지 상태.
 
-      fs.readdir('./data', (err, filelist) => {
+      fs.readdir('./data', (err, filelist) => { //filelist 얻어옴. 
+        console.log(filelist); // 배열로 들어옴. [ 'CSS', 'HTML', 'Javascript' ]
 
         var title = 'Welcome';
         var description = 'Hello, Node.js';
+
+        // 글 목록 가져옴. 
         var list = '<ul>';
-        console.log(filelist);
         for (var i = 0; i < filelist.length; i++) {
           list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</li>`
         }
         list = list + '</ul>';
+
+        // 본문
         var template = `
       <!doctype html>
       <html>
@@ -46,14 +50,14 @@ var app = http.createServer(function (request, response) {
 
     } else {
       fs.readdir('./data', (err, filelist) => {
-        var title = 'Welcome';
-        var description = 'Hello, Node.js';
+        // 글 목록 가져오기.
         var list = '<ul>';
-
         for (var i = 0; i < filelist.length; i++) {
           list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</li>`
         }
         list = list + '</ul>';
+
+        // 본문
         fs.readFile(`data/${queryData.id}`, 'utf8', function (err, description) {
           var title = queryData.id;
           var template = `
