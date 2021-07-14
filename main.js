@@ -13,6 +13,7 @@ function templateHTML(title, list, body) { // 본문내용
   <body>
     <h1><a href="/">WEB</a></h1>
       ${list}
+      <a href="/create">create<a/>
       ${body}
   </body>
   </html>
@@ -39,6 +40,7 @@ var app = http.createServer(function (request, response) {
 
       fs.readdir('./data', (err, filelist) => { //filelist 얻어옴. 
         console.log(filelist); // 배열로 들어옴. [ 'CSS', 'HTML', 'Javascript' ]
+        // ./data 폴더에서 nodejs 파일을 추가하면, 알아서 화면에서 배열을 돌면서 목록을 뿌린다. 
 
         var title = 'Welcome';
         var description = 'Hello, Node.js';
@@ -68,6 +70,30 @@ var app = http.createServer(function (request, response) {
         });
       });
     }
+  } else if (pathname === '/create') {
+    fs.readdir('./data', (err, filelist) => { //filelist 얻어옴. 
+      console.log(filelist); // 배열로 들어옴. [ 'CSS', 'HTML', 'Javascript' ]
+
+      var title = 'Web - create';
+      // 글 목록 가져옴. 
+      var list = templateList(filelist);
+
+      // 본문
+      var template = templateHTML(title, list, `
+      <form action="http://localhost:3000/prcess_create" method="post">
+      <p><input type="text" name="title" placeholder="title"></p>
+      <p>
+        <textarea placeholder="description" name="description"></textarea>
+      </p>
+      <p>
+        <input type="submit" />
+      </p>
+    </form>
+      `);
+
+      response.writeHead(200);
+      response.end(template);
+    })
   } else {
     response.writeHead(404);
     response.end('Not Found');
