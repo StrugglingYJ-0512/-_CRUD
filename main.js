@@ -3,8 +3,10 @@ var fs = require('fs');
 var url = require('url');
 var qs = require('querystring');
 
-function templateHTML(title, list, body, controle) { // 본문내용
-  return `
+
+var template = {
+  html: function (title, list, body, controle) { // 본문내용
+    return `
   <!doctype html>
   <html>
   <head>
@@ -19,15 +21,17 @@ function templateHTML(title, list, body, controle) { // 본문내용
   </body>
   </html>
   `;
-}
-
-function templateList(filelist) { // 글목록 가져옴
-  var list = '<ul>';
-  for (var i = 0; i < filelist.length; i++) {
-    list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</li>`
+  },
+  list: function (filelist) { // 글목록 가져옴
+    var list = '<ul>';
+    for (var i = 0; i < filelist.length; i++) {
+      list = list + `<li><a href="/?id=${filelist[i]}">${filelist[i]}</li>`
+    }
+    list = list + '</ul>';
+    return list;
   }
-  list = list + '</ul>';
-  return list;
+
+
 }
 
 var app = http.createServer(function (request, response) {
@@ -43,34 +47,40 @@ var app = http.createServer(function (request, response) {
         var title = 'Welcome';
         var description = 'Hello, Node.js';
         // 글 목록 가져옴. 
-        var list = templateList(filelist);
+        var list = template.list(filelist);
         // 본문
-        var template = templateHTML(title, list,
+        var html = template.html(title, list,
           `<h2>${title}</h2>${description}`,
           ` <a href="/create">create</a> `);
         response.writeHead(200);
-        response.end(template);
+        response.end(html);
       })
 
     } else { // id 값이 존재함. ( 최상위 디렉터리가 아님)
       fs.readdir('./data', (err, filelist) => {
-        var list = templateList(filelist);
+        var list = template.list(filelist);
         // 본문
         fs.readFile(`data/${queryData.id}`, 'utf8', function (err, description) {
           var title = queryData.id;
-          var template = templateHTML(title, list,
+          var html = template.html(title, list,
             `<h2>${title}</h2>${description}`,
-            `<a href="/create">create<a/> <a href="/update?id=${title}">update</a>`);
+            `<a href="/create">create<a/> 
+            <a href="/update?id=${title}">update</a>
+            <form action="delete_process" method="post">
+              <input type="hidden" name="id" value="${title}">
+              <input type="submit" name="delete">
+            </form>
+            `);
           response.writeHead(200);
-          response.end(template);
+          response.end(html);
         });
       });
     }
   } else if (pathname === '/create') {
     fs.readdir('./data', function (error, filelist) {
       var title = 'WEB - create';
-      var list = templateList(filelist);
-      var template = templateHTML(title, list, `
+      var list = template.list(filelist);
+      var html = template.html(title, list, `
         <form action="/create_process" method="post">
           <p><input type="text" name="title" placeholder="title"></p>
           <p>
@@ -82,7 +92,7 @@ var app = http.createServer(function (request, response) {
         </form>
       `, '');
       response.writeHead(200);
-      response.end(template);
+      response.end(html);
     })
 
   } else if (pathname === '/create_process') {
@@ -115,10 +125,10 @@ var app = http.createServer(function (request, response) {
 
       // 본문
       fs.readdir('./data', (err, filelist) => {
-        var list = templateList(filelist);
+        var list = template.list(filelist);
         fs.readFile(`data/${queryData.id}`, 'utf8', function (err, description) {
           var title = queryData.id;
-          var template = templateHTML(title, list,
+          var html = template.html(title, list,
             `
             <form action="/update_process" method="post"> 
             <input type="hidden" name="id" value="${title}">  
@@ -133,7 +143,7 @@ var app = http.createServer(function (request, response) {
             `,
             `<a href="/create">create<a/> <a href="/update?id=${title}">update</a>`);
           response.writeHead(200);
-          response.end(template);
+          response.end(html);
         });
       });
     });
@@ -165,6 +175,31 @@ var app = http.createServer(function (request, response) {
       })
 
     });
+
+    // delete 버튼 누르면, form -action속성의 값으로 데이터 전달(post)/path를 통해서 삭제하고싶다. 
+    // update_process에서 로직 복사해옴.
+  } else if (pathname === '/delete_process') {
+    var body = '';
+    request.on('data', (data) => {
+      body += data;
+    });
+    console.log("delete01")
+    request.on('end', () => {
+      var post = qs.parse(body);
+      var id = post.id;
+      console.log("delete02")
+
+      //Google : nodejs delete file
+      fs.unlink(`data/${id}`, (err) => {
+        // fs.unlink(`data/${id}`) : data/${id}파일이 삭제됨
+        //콜백 :
+        response.writeHead(302,
+          { Location: `/` });
+        response.end();
+
+      })
+    });
+
 
   } else {
     response.writeHead(404);
