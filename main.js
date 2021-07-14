@@ -1,6 +1,7 @@
 var http = require('http');
 var fs = require('fs');
 var url = require('url');
+var qs = require('querystring');
 
 function templateHTML(title, list, body) { // 본문내용
   return `
@@ -80,7 +81,7 @@ var app = http.createServer(function (request, response) {
 
       // 본문
       var template = templateHTML(title, list, `
-      <form action="http://localhost:3000/prcess_create" method="post">
+      <form action="http://localhost:3000/create_process" method="post">
       <p><input type="text" name="title" placeholder="title"></p>
       <p>
         <textarea placeholder="description" name="description"></textarea>
@@ -94,6 +95,33 @@ var app = http.createServer(function (request, response) {
       response.writeHead(200);
       response.end(template);
     })
+  } else if (pathname === '/create_process') {
+    // 이 단락은 위에서 post를 했고, post를 한 url 페이지를 띄우는 페이지
+    /* else if 생성 후에, 제대로 동작하는지 확인차 넣어봄
+    response.writeHead(200);
+    response.end('SUCCESS'); 
+    */
+    // 검색 : nodejs post date (post data를 가져오는 방법을 알고싶다.)
+    var body = '';
+
+    // request : 클라이언트가 서버한테 요청할 때 정보를 담는 인자
+    // web이 post 방식으로 많은 데이터 전송시, 컴퓨터가 꺼지는 등 부하가 걸릴 수 있다. 
+    // 'data'는 많은 양의 데이터를 조각조각 잘라 데이터를 서버가 수신할 떄마다 서버는 콜백함수를 호출한다. 
+    // 데이터를 인자로 받아, 수신하는 정보를 받는다. 
+    request.on('data', (data) => {
+      body += data; //body데이터에다가 콜백이 실행 될 때마다, 데이터를 추가한다. 
+    });
+    request.on('end', () => {
+      var post = qs.parse(body); // parse함수를 이용해서 정보를 객체(post)할 수 있따. 
+      console.log(post);
+      var title = post.title;
+      var description = post.description;
+      console.log(post.tile);
+    });
+    // 'data', 'end' 를 이벤트라고 한다 : 
+    response.writeHead(200);
+    response.end('SUCCESS');
+
   } else {
     response.writeHead(404);
     response.end('Not Found');
