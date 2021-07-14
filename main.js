@@ -116,11 +116,20 @@ var app = http.createServer(function (request, response) {
       console.log(post);
       var title = post.title;
       var description = post.description;
-      console.log(post.tile);
+      console.log(post.title);
+      // 'data', 'end' 를 이벤트라고 한다 : 
+
+      //post 방식으로 전송된 데이터를 데이터 디렉터리 안에 파일의 형태로 저장하는 방법.
+      fs.writeFile(`data/${title}`, description, 'utf8', (err) => {
+        // 콜백이 실행한다 == 파일에 저장이 끝났다! 라는 의미
+        // 콜백은 err인자를 받으므로,err처리를 해주는 것이나, 우리는 하지 않는다. 
+        response.writeHead(302, // 301은 영원히 보내버린다의 뜻. 302가 리다이렉션 코드
+          { Location: `/?id=${title}` });
+        response.end();
+      })
     });
-    // 'data', 'end' 를 이벤트라고 한다 : 
-    response.writeHead(200);
-    response.end('SUCCESS');
+
+
 
   } else {
     response.writeHead(404);
