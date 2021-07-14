@@ -67,22 +67,19 @@ var app = http.createServer(function (request, response) {
       });
     }
   } else if (pathname === '/create') {
-    fs.readdir('./data', (err, filelist) => {
-      console.log(filelist);
-      var title = 'Web - create';
-      // 글 목록 가져옴. 
+    fs.readdir('./data', function (error, filelist) {
+      var title = 'WEB - create';
       var list = templateList(filelist);
-      // 본문
       var template = templateHTML(title, list, `
-      <form action="/create_process" method="post"> 
-      <p><input type="text" name="title" placeholder="title"></p>
-      <p>
-        <textarea placeholder="description" name="description"></textarea>
-      </p>
-      <p>
-        <input type="submit" />
-      </p>
-    </form>
+        <form action="/create_process" method="post">
+          <p><input type="text" name="title" placeholder="title"></p>
+          <p>
+            <textarea name="description" placeholder="description"></textarea>
+          </p>
+          <p>
+            <input type="submit">
+          </p>
+        </form>
       `, '');
       response.writeHead(200);
       response.end(template);
@@ -97,6 +94,7 @@ var app = http.createServer(function (request, response) {
       var post = qs.parse(body);
       console.log(post);
       var title = post.title;
+      console.log(title);
       var description = post.description;
       console.log(post.title);
       fs.writeFile(`data/${title}`, description, 'utf8', (err) => {
@@ -139,6 +137,35 @@ var app = http.createServer(function (request, response) {
         });
       });
     });
+
+    /*
+     update_process 정보를 받음.
+     /create_process  와 같음! (이것도 post방식으로 받은 데이터를 받는 로직이므로)
+    */
+  } else if (pathname === '/update_process') {
+    var body = '';
+    request.on('data', (data) => {
+      body += data;
+    });
+    request.on('end', () => {
+      var post = qs.parse(body);
+      console.log(post);
+      var id = post.id; // 기존에는 id값은 받지 않았으나, update시에는 id값을 받음(name="id")!!
+      var title = post.title;
+      var description = post.description;
+
+      // 파일의 이름(title)을 변경했으니, 실제 파일명도 바꿔줘야한다. 
+      // Google : nodejs file rename 
+      fs.rename(`data/${id}`, `data/${title}`, (err) => {
+        fs.writeFile(`data/${title}`, description, 'utf8', (err) => {
+          response.writeHead(302,
+            { Location: `/?id=${title}` });
+          response.end();
+        })
+      })
+
+    });
+
   } else {
     response.writeHead(404);
     response.end('Not Found');
