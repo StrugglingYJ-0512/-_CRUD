@@ -3,7 +3,7 @@ var fs = require('fs');
 var url = require('url');
 var qs = require('querystring');
 
-function templateHTML(title, list, body) { // 본문내용
+function templateHTML(title, list, body, controle) { // 본문내용
   return `
   <!doctype html>
   <html>
@@ -14,7 +14,7 @@ function templateHTML(title, list, body) { // 본문내용
   <body>
     <h1><a href="/">WEB</a></h1>
       ${list}
-      <a href="/create">create<a/>
+      ${controle}
       ${body}
   </body>
   </html>
@@ -50,13 +50,16 @@ var app = http.createServer(function (request, response) {
         var list = templateList(filelist);
 
         // 본문
-        var template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
+        var template = templateHTML(title, list,
+          `<h2>${title}</h2>${description}`,
+          ` <a href="/create">create</a> `);
+        // main페이지이니, update(수정)은 보이지 않게 하고,create만 생성하게 함
 
         response.writeHead(200);
         response.end(template);
       })
 
-    } else {
+    } else { // id 값이 존재함. ( 최상위 디렉터리가 아님)
       fs.readdir('./data', (err, filelist) => {
         // 글 목록 가져오기.
         var list = templateList(filelist);
@@ -64,8 +67,10 @@ var app = http.createServer(function (request, response) {
         // 본문
         fs.readFile(`data/${queryData.id}`, 'utf8', function (err, description) {
           var title = queryData.id;
-          var template = templateHTML(title, list, `<h2>${title}</h2>${description}`);
-
+          var template = templateHTML(title, list,
+            `<h2>${title}</h2>${description}`,
+            `<a href="/create">create<a/> <a href="/update?id=${title}">update</a>`);
+          // main페이지가 아니니, create + update(수정) 까지 같이 있다. 
           response.writeHead(200);
           response.end(template);
         });
@@ -90,7 +95,7 @@ var app = http.createServer(function (request, response) {
         <input type="submit" />
       </p>
     </form>
-      `);
+      `, '');
 
       response.writeHead(200);
       response.end(template);
